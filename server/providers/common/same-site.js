@@ -13,12 +13,19 @@ import { admitSameSiteRequest } from '../../../src/localRequestGate.mjs';
  * @returns {boolean} True when a 403 was sent.
  */
 export function admitSameSite(req, res) {
+  // LOCAL PATCH (Paul's Studio): behind our own trusted reverse proxy
+  // (Nginx Proxy Manager + basic auth), GEV_TRUST_PROXY=1 accepts its
+  // forwarding headers. The cross-site and Origin checks still apply.
+  const trustProxy = process.env.GEV_TRUST_PROXY === '1';
+  const fwdProto = String(req.headers?.['x-forwarded-proto'] || '').split(',')[0].trim().toLowerCase();
   const verdict = admitSameSiteRequest({
     hostHeader: req.headers?.host,
-    protocol: req.socket?.encrypted ? 'https:' : 'http:',
+    protocol: trustProxy && (fwdProto === 'https' || fwdProto === 'http')
+      ? `${fwdProto}:`
+      : req.socket?.encrypted ? 'https:' : 'http:',
     origin: req.headers?.origin,
     secFetchSite: req.headers?.['sec-fetch-site'],
-    proxyHeaders: req.headers || {},
+    proxyHeaders: trustProxy ? {} : req.headers || {},
   });
   if (verdict.ok) return false;
   res.statusCode = verdict.status;
