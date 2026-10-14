@@ -1,5 +1,10 @@
 const priorities = new WeakMap();
 
+/** True once a layer has been parked by orderWeatherImagery. */
+export function isOrderedWeatherImagery(layer) {
+  return priorities.has(layer);
+}
+
 /** Scalar context, infrared, radar, then lightning: independent of enable order. */
 export function orderWeatherImagery(collection, layer, priority) {
   priorities.set(layer, priority);

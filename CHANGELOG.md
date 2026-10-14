@@ -1,5 +1,11 @@
 # Changelog
 
+- Map reference overlays: Roads and Labels drape the Esri World Transportation
+  and World Boundaries and Places reference services, and Boundaries draws
+  OpenFreeMap admin lines (levels 2–6; maritime boundaries omitted). Each
+  toggle is independent and stays just above the basemap, under weather and
+  recent imagery.
+
 - Treat explicitly current, complete empty vessel coverage as a successful update,
   clearing obsolete contacts while retaining stale or incomplete snapshots.
 

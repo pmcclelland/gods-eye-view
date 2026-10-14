@@ -316,6 +316,24 @@ const layers = [
     noQuery: 'imagery tiles; no countable records',
   },
   {
+    id: 'reference-roads',
+    aliases: ['roads'],
+    context: false,
+    noQuery: 'map overlay; no countable records',
+  },
+  {
+    id: 'reference-labels',
+    aliases: ['place labels'],
+    context: false,
+    noQuery: 'map overlay; no countable records',
+  },
+  {
+    id: 'reference-boundaries',
+    aliases: ['boundaries'],
+    context: false,
+    noQuery: 'map overlay; no countable records',
+  },
+  {
     id: 'directions',
     aliases: ['driving directions', 'directions panel'],
     context: false,

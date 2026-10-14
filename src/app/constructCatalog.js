@@ -15,6 +15,7 @@ import { createApplicationTraffic } from './layers/traffic.js';
 import { createApplicationBikeshare } from './layers/bikeshare.js';
 import { createApplicationDirections } from './layers/directions.js';
 import { createApplicationRecentImagery } from './layers/recentImagery.js';
+import { createReferenceLayers } from '../layers/reference/index.js';
 import { createApplicationTransit } from './layers/transit.js';
 import { createApplicationInstallations } from './layers/militaryInstallations.js';
 import { createApplicationSatellites } from './layers/satellites.js';
@@ -135,6 +136,7 @@ export function createApplicationCatalog({
         createApplicationBikeshare({ source: sources.bikeshare }),
         createApplicationDirections({ source: sources.directions }),
         createApplicationRecentImagery({ source: sources['recent-imagery'] }),
+        ...createReferenceLayers(),
         vessels,
         installations,
         createApplicationAwareness({

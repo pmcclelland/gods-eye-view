@@ -643,6 +643,21 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
     optionOwner: 'recent-imagery',
   }),
   Object.freeze({
+    id: 'reference-boundaries',
+    token: '3',
+    disposition: 'enabled-only',
+  }),
+  Object.freeze({
+    id: 'reference-labels',
+    token: '4',
+    disposition: 'enabled-only',
+  }),
+  Object.freeze({
+    id: 'reference-roads',
+    token: '5',
+    disposition: 'enabled-only',
+  }),
+  Object.freeze({
     id: 'rocket-launches',
     token: 'x',
     disposition: 'enabled-only',

@@ -970,5 +970,10 @@
   "src/tools/views.test.mjs",
   "src/app/embed.test.mjs",
   "src/tools/globePanel.test.mjs",
-  "src/costEndpointThrottle.test.mjs"
+  "src/costEndpointThrottle.test.mjs",
+  "src/layers/reference/boundaryStyle.test.mjs",
+  "src/layers/reference/boundaryTiles.test.mjs",
+  "src/layers/reference/imagery.test.mjs",
+  "src/layers/reference/index.test.mjs",
+  "src/layers/reference/layerState.test.mjs"
 ]
