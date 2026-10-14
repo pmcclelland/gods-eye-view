@@ -341,6 +341,7 @@ export class StyleManager extends ShellFacade {
         _updateTrafficSyncChip: (...args) =>
           this._updateTrafficSyncChip(...args),
         _showToast: (...args) => this._showToast(...args),
+        getDataManager: () => this._dataManager,
       },
     });
     this._lastTrafficChipUpdateAt = 0;

@@ -87,6 +87,7 @@ export class LocationSearch {
       const destination = await this.search(query, {
         signal: controller.signal,
         beforeFly: () => current() && this.beforeFly(authority),
+        isCurrent: current,
       });
       if (!current() || controller.signal.aborted) return;
       if (destination?.cancelled) return;

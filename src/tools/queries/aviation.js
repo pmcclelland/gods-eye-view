@@ -16,6 +16,7 @@ import {
   isoTime,
   thinEvenly,
 } from '../results.js';
+import { aircraftIdentityEquals } from '../../search/flightQuery.js';
 
 const ICAO24_SCHEMA = Object.freeze({
   type: 'string',
@@ -207,12 +208,7 @@ export const findAircraft = defineTool({
             }))
           : [],
       )
-      .filter(
-        ({ record }) =>
-          String(record[field] || '')
-            .trim()
-            .toUpperCase() === wanted,
-      )
+      .filter(({ record }) => aircraftIdentityEquals(record[field], wanted))
       .filter(({ record }) => !seen.has(record.id) && seen.add(record.id));
     const rows = matches.map(({ record }) => aircraftRow(record));
     // One match is shown followed; several are not framed.

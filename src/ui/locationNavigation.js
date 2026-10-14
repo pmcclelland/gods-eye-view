@@ -1,5 +1,12 @@
 import * as Cesium from 'cesium';
 import { createStateChannel } from '../app/stateChannel.js';
+import {
+  classifyFlightQuery,
+  ensureFlightsLoaded,
+  flightSearchLoadPlan,
+  liveFlightMissText,
+  matchFlightIdentifier,
+} from '../search/flightQuery.js';
 import { LocationControls } from './location.js';
 
 /** Own destination selection, lookup, orbit and world-jump lifetime. */
@@ -99,8 +106,67 @@ export class LocationNavigation {
     }
   }
 
+  /**
+   * Place search, or a live-flight lookup when the query is a flight identifier.
+   * A strong miss toasts and does not geocode. A weak miss falls through to
+   * place search, and a weak query does not turn Live Flights on. A hit uses
+   * the flight layer's own track path — the same one a plane click uses.
+   * @param {string} query
+   * @param {{signal?: AbortSignal, beforeFly?: Function, isCurrent?: Function}} [options]
+   */
+  async _searchLocation(query, options) {
+    const flight = await this._searchLiveFlight(query, options);
+    if (flight) return flight;
+    const { searchAndFlyTo } = this.services;
+    return searchAndFlyTo(this.viewer, query, {
+      placeSearch: this.placeSearch,
+      ...options,
+    });
+  }
+
+  async _searchLiveFlight(query, options) {
+    const classified = classifyFlightQuery(query);
+    if (!classified) return null;
+    const signal = options?.signal;
+    signal?.throwIfAborted();
+    const dataManager = this.getDataManager?.();
+    const enabled = !!dataManager?.isEnabled?.('flights');
+    const plan = flightSearchLoadPlan(classified, { enabled });
+    // Weak queries (routes, short tails, hex) never toggle the layer. They
+    // match only when Live Flights is already on; otherwise this is a place.
+    if (plan === 'skip') return null;
+    if (plan === 'load' && dataManager?.isEnabled && dataManager?.setEnabled) {
+      await ensureFlightsLoaded({
+        isEnabled: () => dataManager.isEnabled('flights'),
+        enable: ({ signal: enableSignal }) =>
+          dataManager.setEnabled('flights', true, {
+            origin: 'user',
+            signal: enableSignal,
+          }),
+        signal,
+      });
+    }
+    if (signal?.aborted || (options?.isCurrent && !options.isCurrent())) {
+      return { cancelled: true };
+    }
+    const match = matchFlightIdentifier(
+      this.services.flightsLayer?.listFlightIdentities?.() || [],
+      classified,
+    );
+    if (!match) {
+      if (!classified.strong) return null;
+      this._showToast?.(liveFlightMissText(classified));
+      return { cancelled: true };
+    }
+    if (options?.beforeFly && options.beforeFly() === false) {
+      return { cancelled: true };
+    }
+    this.services.flightsLayer?.trackById?.(match.id, { origin: 'user' });
+    return { cancelled: true };
+  }
+
   _initLocationBar() {
-    const { CITY_POIS, searchAndFlyTo, LocationSearch } = this.services;
+    const { CITY_POIS, LocationSearch } = this.services;
     this._locationControls?.destroy();
     this._locationLookupUnsubscribe?.();
     this._locationLookup?.destroy();
@@ -110,11 +176,7 @@ export class LocationNavigation {
       isCurrent: (generation) =>
         !this._disposed && generation === this._navigationGeneration,
       beforeFly: (generation) => this._reassertNavigationHandoff(generation),
-      search: (query, options) =>
-        searchAndFlyTo(this.viewer, query, {
-          placeSearch: this.placeSearch,
-          ...options,
-        }),
+      search: (query, options) => this._searchLocation(query, options),
       onResult: (destination) => {
         if (destination.outlineUnavailable)
           this._showToast('Detailed outline unavailable');

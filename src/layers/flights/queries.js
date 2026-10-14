@@ -483,6 +483,25 @@ export function createQueries({
     },
 
     /**
+     * Plain identities of the aircraft currently loaded in this layer.
+     * Search-box matching reads this instead of walking Cesium objects.
+     * @returns {Array<{id: string, callsign: string|null, registration: string|null}>}
+     */
+    listFlightIdentities() {
+      if (!flightState.records.data || flightState.records.data.size === 0)
+        return [];
+      const rows = [];
+      for (const [icao24, info] of flightState.records.data) {
+        rows.push({
+          id: icao24,
+          callsign: _toCleanText(info?.callsign) || null,
+          registration: _toCleanText(info?.registration) || null,
+        });
+      }
+      return rows;
+    },
+
+    /**
      * Find a single aircraft by free-text query.
      * Match priority: exact icao24 hex, exact callsign, callsign prefix,
      * then callsign substring (all case-insensitive, trimmed).
